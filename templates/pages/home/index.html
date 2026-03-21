@@ -1,0 +1,159 @@
+{% extends "layouts/base.html" %}
+
+
+{% block "body" %}
+<div class="flex flex-col gap-8 p-8 h-svh overflow-y-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <p class="font-teko font-medium text-white text-3xl">Produtos</p>
+            <p class="text-gray-300" x-text="`Total de ${products.length || 0} encontrados`"></p>
+        </div>
+        <c-html.button
+            variant="confirm"
+            @click="scrapeModal.show = true"
+            type="button"
+        >Importar Produtos</c-html.button>
+    </div>
+
+    <template x-if="loading">
+        <div class="flex flex-1 justify-center items-center gap-2 border border-[#323232] rounded-lg text-white">
+            <c-icon.arrow_path class="animate-spin"></c-icon.arrow_path>
+            <p>Carregando...</p>
+        </div>
+    </template>
+
+    <template x-if="!loading && products.length == 0">
+        <div class="flex flex-1 justify-center items-center gap-2 border border-[#323232] rounded-lg text-white">
+            <p>Nenhum produto cadastrado</p>
+        </div>
+    </template>
+
+    <div class="gap-8 grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6">
+        <template x-for="product in products" :key="product.id">
+            <div class="bg-white rounded-lg overflow-hidden">
+                <img class="mx-auto" :src="product.image" :alt="product.description">
+                <div class="space-y-2 p-4">
+                    <p class="text-gray-600 text-xs" x-text="product.brand"></p>
+                    <p class="font-medium text-sm" x-text="product.description"></p>
+                    <p class="font-semibold text-green-600" x-text="'$ ' + product.price"></p>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block "components" %}
+<c-modal class="space-y-8 p-8" variable="scrapeModal.show">
+    <div>
+        <p class="font-teko font-medium text-white text-2xl">Importar Produtos</p>
+        <p class="text-neutral-400 text-sm">Informe o sufixo da coleção no campo abaixo</p>
+    </div>
+
+    <div class="flex items-center">
+        <span class="bg-gray-100 px-4 py-2 rounded-l-lg text-sm whitespace-nowrap select-none">…/collections/</span>
+        <c-html.input
+            class="flex-1 text-sm"
+            x-model="scrapeModal.urlSuffix"
+            placeholder="arroz-feijao-e-graos"
+            @keydown.enter="scrape()"
+            type="text"
+        ></c-html.input>
+    </div>
+
+    <div class="flex justify-end gap-4">
+        <c-html.button
+            variant="cancel"
+            @click="scrapeModal = false"
+            type="button"
+        >Cancelar</c-html.button>
+        <c-html.button variant="confirm" @click="scrape()" ::disabled="scrapeModal.scraping" type="button">
+            <c-icon.arrow_path class="animate-spin" x-show="scrapeModal.scraping" x-cloak></c-icon.arrow_path>
+            <p x-text="scrapeModal.scraping ? 'Importando' : 'Importar'"></p>
+        </c-html.button>
+    </div>
+</c-modal>
+{% endblock %}
+
+
+{% block "script" %}
+<script>
+document.addEventListener("alpine:init", () => {
+    Alpine.data("alpine", () => ({
+
+        loading: true,
+        products: [],
+        scrapeModal: {
+            show: false,
+            scraping: false,
+            urlSuffix: "",
+        },
+
+        async init() {
+            await this.getProducts()
+        },
+
+        getProducts() {
+            this.loading = true
+            fetch("{% url 'products' %}")
+            .then(async response => {
+                const data = await response.json()
+                if (!response.ok) throw data
+                return data
+            })
+            .then(data => {
+                this.products = data
+            })
+            .catch(data => {
+                this.$dispatch("show-message", {
+                    message: "Ocorreu um problema ao buscar os produtos",
+                    messageType: "error",
+                })
+            })
+            .finally(() => {
+                this.loading = false
+            })
+        },
+
+        scrape() {
+            if (!this.scrapeModal.urlSuffix.trim()) return
+            this.scrapeModal.scraping = true
+            fetch("{% url 'scrape' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({
+                    url: this.scrapeModal.urlSuffix.trim(),
+                }),
+            })
+            .then(async response => {
+                const data = await response.json()
+                if (!response.ok) throw data
+                return data
+            })
+            .then(async data => {
+                await this.getProducts()
+                this.$dispatch("show-message", {
+                    message: data.detail,
+                    messageType: data.detail_type,
+                })
+            })
+            .catch(data => {
+                this.$dispatch("show-message", {
+                    message: data.detail,
+                    messageType: data.detail_type,
+                })
+            })
+            .finally(() => {
+                this.scrapeModal.scraping = false
+                this.scrapeModal.show = false
+            })
+        },
+
+    }))
+})
+</script>
+{% endblock %}

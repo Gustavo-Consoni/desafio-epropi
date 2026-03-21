@@ -1,0 +1,17 @@
+<c-vars variable class />
+
+<div
+    class="z-50 fixed inset-0 flex justify-center items-center bg-black/50"
+    @click.stop="{{ variable }} = false"
+    x-show="{{ variable }}"
+    x-transition.opacity.duration.500ms
+    x-cloak
+>
+    <div
+        class="{{ class }} bg-[#212121] max-sm:mx-8 border border-[#323232] rounded-lg w-full max-w-lg"
+        @click.stop
+        {{ attrs }}
+    >
+        {{ slot }}
+    </div>
+</div>

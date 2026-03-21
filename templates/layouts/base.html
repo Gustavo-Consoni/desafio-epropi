@@ -1,0 +1,47 @@
+{% load static %}
+{% load tailwind_cli %}
+
+
+<!doctype html>
+<html class="antialiased scroll-smooth" lang="pt-BR">
+    <head>
+        <title>ePropi</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <link rel="icon" href="{% static 'images/icon.ico' %}" type="image/x-icon" sizes="192x192">
+        <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+        {% tailwind_css %}
+        {% block "head" %}{% endblock %}
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+        <style>
+            * {
+                font-family: "Poppins", sans-serif;
+            }
+            .font-teko {
+                font-family: "Teko", sans-serif;
+            }
+            [x-cloak] {
+                display: none !important;
+            }
+            ::-webkit-scrollbar {
+                width: 12px;
+                height: 12px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #212121;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #323232;
+            }
+        </style>
+    </head>
+    <body x-data="alpine">
+        <div class="bg-[#101010]">
+            {% block "body" %}{% endblock %}
+        </div>
+        {% block "components" %}{% endblock %}
+        {% block "script" %}{% endblock %}
+        <c-message></c-message>
+    </body>
+</html>

@@ -1,0 +1,11 @@
+Django==5.2.*
+djangorestframework
+django-tailwind-cli
+django-debug-toolbar
+django-unfold
+django-cotton
+
+
+requests
+beautifulsoup4
+python-decouple
