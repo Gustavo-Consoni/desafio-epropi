@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     "django_tailwind_cli",
 
     "core",
-    "apps.home",
+    "apps.product",
+    "apps.scrapy",
 ]
 
 MIDDLEWARE = [

@@ -6,6 +6,5 @@ django-unfold
 django-cotton
 
 
-requests
-beautifulsoup4
+Scrapy
 python-decouple

@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("unfold/", admin.site.urls),
-    path("", include("apps.home.urls")),
+    path("", include("apps.product.urls")),
 ]
 
 

@@ -1,7 +1,7 @@
 from django.dispatch import receiver
 from django.core.files.storage import default_storage
 from django.db.models.signals import post_delete
-from apps.home.models import Product
+from apps.product.models import Product
 
 
 @receiver(post_delete, sender=Product)
